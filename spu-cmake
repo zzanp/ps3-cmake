@@ -1,0 +1,15 @@
+#!/bin/sh
+
+spu_prefix=$PS3DEV/portlibs/spu
+if [ ! -d $ppu_prefix ]; then mkdir -p $spu_prefix; fi
+
+export PKG_CONFIG_LIBDIR=${spu_prefix}/lib/pkgconfig
+
+MODULE_PATH=$(dirname "$0")/spu
+
+cmake \
+  -DCMAKE_INSTALL_PREFIX:PATH=${spu_prefix} \
+  -DBUILD_SHARED_LIBS:BOOL=OFF \
+  -DCMAKE_MODULE_PATH=$MODULE_PATH \
+  -DCMAKE_TOOLCHAIN_FILE=$MODULE_PATH/spu.cmake \
+  "$@"

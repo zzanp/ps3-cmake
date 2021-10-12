@@ -1,0 +1,15 @@
+#!/bin/sh
+
+ppu_prefix=$PS3DEV/portlibs/ppu
+if [ ! -d $ppu_prefix ]; then mkdir -p $ppu_prefix; fi
+
+export PKG_CONFIG_LIBDIR=${ppu_prefix}/lib/pkgconfig
+
+MODULE_PATH=$(dirname "$0")/ppu
+
+cmake \
+  -DCMAKE_INSTALL_PREFIX:PATH=${ppu_prefix} \
+  -DBUILD_SHARED_LIBS:BOOL=OFF \
+  -DCMAKE_MODULE_PATH=$MODULE_PATH \
+  -DCMAKE_TOOLCHAIN_FILE=$MODULE_PATH/ppu.cmake \
+  "$@"
