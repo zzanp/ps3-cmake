@@ -33,3 +33,22 @@ set(PPU_LIBRARIES
 	-L${PPUROOT}/lib -L${PPUROOT}/powerpc64-ps3-elf/lib -L${PS3DEV}/portlibs/ppu/lib"
 )
 
+add_compile_options(-mcpu=cell)
+
+macro(sprx_link)
+    foreach(arg IN LISTS ARGN)
+        add_custom_command(TARGET ${arg} POST_BUILD COMMAND ${PS3DEV}/bin/sprxlinker ${arg})
+    endforeach()
+endmacro()
+
+macro(add_self_executable)
+    cmake_parse_arguments(ARG "" "OUTPUT" "TARGET" ${ARGN})
+    add_custom_command(TARGET ${ARG_TARGET} POST_BUILD COMMAND ${PS3DEV}/bin/make_self ${ARG_TARGET} ${ARG_OUTPUT})
+endmacro()
+
+macro(target_add_ps3_executable output_file)
+	foreach(arg IN LISTS ARGN)
+		sprx_link(arg)
+	endforeach()
+	add_self_executable(TARGET "${ARGN}" OUTPUT "${output_file}")
+endmacro()
