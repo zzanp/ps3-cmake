@@ -1,31 +1,47 @@
-if(DEFINED ENV{PS3DEV})
-    set(PS3DEV $ENV{PS3DEV})
-else()
-    message(FATAL_ERROR "PS3DEV path is undefined.")
-endif ()
+if(NOT DEFINED ENV{PS3DEV})
+    message(FATAL_ERROR "PS3DEV environment variable is undefined.")
+endif()
 
+set(PS3DEV $ENV{PS3DEV})
 set(SPUROOT ${PS3DEV}/spu)
 set(SPUBIN ${SPUROOT}/bin)
+set(PS3BIN ${PS3DEV}/bin)
 
-set(CMAKE_PREFIX_PATH ${SPUROOT} ${SPUROOT}/spu)
 set(CMAKE_SYSTEM_NAME Generic)
+
 set(CMAKE_C_COMPILER ${SPUBIN}/spu-gcc)
 set(CMAKE_CXX_COMPILER ${SPUBIN}/spu-g++)
+set(CMAKE_STRIP ${SPUBIN}/spu-strip)
+
 set(CMAKE_FIND_ROOT_PATH ${SPUROOT})
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
-set(STRIP ${SPUBIN}/spu-strip)
 
-include_directories(${include_directories} ${SPUROOT}/include ${SPUROOT}/include)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-add_definitions("-D_PS3")
+set(SPU_FLAGS "-MMD -MP -MF -O2 -mdual-nops -fmodulo-sched -ffunction-sections -fdata-sections ")
 
-set(SPU_LIBRARIES
-	"-lc -lg -lgloss -lsimdmath -lspuatomic
-	-lspudma -lspumars -lspumarstask -lsputhread \
-	-L${SPUROOT}/lib -L${SPUROOT}/spu/lib"
+set(OLD_CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+set(OLD_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+set(OLD_CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SPU_FLAGS}" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SPU_FLAGS} -Wall" CACHE STRING "" FORCE)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SPU_FLAGS} -Wl,--gc-sections" CACHE STRING "" FORCE)
+set(CMAKE_LINK_DEPENDS_USE_LINKER FALSE)
+
+include_directories(
+    ${SPUROOT}/include 
+    ${PPUROOT}/lib64/gcc/spu/7.2.0/include
+    ${SPUROOT}/include/simdmath
 )
 
+link_directories(
+    ${SPUROOT}/lib
+)
+
+set(CMAKE_C_FLAGS "${OLD_CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${OLD_CMAKE_CXX_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${OLD_CMAKE_EXE_LINKER_FLAGS}")

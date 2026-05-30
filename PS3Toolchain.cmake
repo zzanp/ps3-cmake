@@ -1,5 +1,0 @@
-if(NOT PS3_TARGET_SPU)
-	include(${CMAKE_CURRENT_LIST_DIR}/ppu/ppu.cmake)
-else()
-	include(${CMAKE_CURRENT_LIST_DIR}/spu/spu.cmake)
-endif()
